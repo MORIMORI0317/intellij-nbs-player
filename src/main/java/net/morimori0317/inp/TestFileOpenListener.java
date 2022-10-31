@@ -15,15 +15,18 @@ import java.io.InputStream;
 public class TestFileOpenListener implements FileEditorManagerListener {
     @Override
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
+        if(true)
+            return;
+
         if (!FileTypeRegistry.getInstance().isFileOfType(file, NBSFileType.INSTANCE))
             return;
 
         var player = NBSPlayerService.getInstance(source.getProject());
         NBS nbs;
 
-        try (InputStream stream = new BufferedInputStream(file.getInputStream())){
+        try (InputStream stream = new BufferedInputStream(file.getInputStream())) {
             nbs = new NBS(stream);
-        } catch(IOException e){
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

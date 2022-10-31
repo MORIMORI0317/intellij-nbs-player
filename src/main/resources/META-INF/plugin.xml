@@ -2,9 +2,21 @@
 <idea-plugin>
     <id>net.morimori0317.inp</id>
     <name>Minecraft NBS Player</name>
-    <vendor>MORIMORI031</vendor>
+    <vendor>MORIMORI0317</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+
+    <actions>
+        <group id="NBS.NBSPlayerActions">
+            <action class="net.morimori0317.inp.editor.actions.PlayPauseAction"
+                    id="NBS.Editor.PlayPause"
+                    icon="AllIcons.Graph.Grid"/>
+        </group>
+
+        <group id="NBS.EditorToolbar">
+            <reference id="NBS.Editor.PlayPause"/>
+        </group>
+    </actions>
 
     <applicationListeners>
         <listener class="net.morimori0317.inp.TestFileOpenListener"
@@ -18,6 +30,7 @@
                   fieldName="INSTANCE"
                   language="NBS"
                   extensions="nbs"/>
+        <fileEditorProvider implementation="net.morimori0317.inp.editor.NBSFileEditorProvider"/>
     </extensions>
 
 </idea-plugin>

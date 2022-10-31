@@ -1,4 +1,3 @@
-import org.jetbrains.changelog.markdownToHTML
 
 fun properties(key: String) = project.findProperty(key).toString()
 

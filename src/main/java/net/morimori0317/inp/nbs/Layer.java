@@ -7,7 +7,7 @@ public class Layer {
     private final Map<Integer, Note> notes = new TreeMap<>();
     private String name;
     private boolean lock;
-    private int volume;
+    private int volume = 100;
     private int stereo;
 
     public Layer() {
@@ -20,7 +20,6 @@ public class Layer {
         this.volume = volume;
         this.stereo = stereo;
     }
-
 
     public int getStereo() {
         return stereo;
