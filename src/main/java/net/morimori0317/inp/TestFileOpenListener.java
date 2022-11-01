@@ -15,8 +15,8 @@ import java.io.InputStream;
 public class TestFileOpenListener implements FileEditorManagerListener {
     @Override
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-        if(true)
-            return;
+        //if (true)
+        //    return;
 
         if (!FileTypeRegistry.getInstance().isFileOfType(file, NBSFileType.INSTANCE))
             return;

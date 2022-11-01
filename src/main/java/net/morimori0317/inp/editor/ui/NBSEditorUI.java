@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.panels.NonOpaquePanel;
 import net.morimori0317.inp.editor.actions.NBSEditorActions;
 import net.morimori0317.inp.nbs.NBSLoadResult;
@@ -15,7 +16,7 @@ import java.awt.*;
 public class NBSEditorUI extends JPanel implements Disposable {
     private final NBSLoadResult nbsLoadResult;
 
-    public NBSEditorUI(@NotNull NBSLoadResult nbsLoadResult) {
+    public NBSEditorUI(@NotNull Project project, @NotNull NBSLoadResult nbsLoadResult) {
         this.nbsLoadResult = nbsLoadResult;
 
         setLayout(new BorderLayout());
@@ -33,7 +34,7 @@ public class NBSEditorUI extends JPanel implements Disposable {
         add(topPanel, BorderLayout.NORTH);
 
         if (nbsLoadResult.getNBS() != null) {
-            add(new NBSLinePanel(nbsLoadResult.getNBS()), BorderLayout.CENTER);
+            add(new NBSLinePanel(project, nbsLoadResult.getNBS()), BorderLayout.CENTER);
         }
     }
 

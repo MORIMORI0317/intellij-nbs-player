@@ -1,5 +1,8 @@
 package net.morimori0317.inp.nbs.instrument;
 
+import net.morimori0317.inp.INPIcons;
+
+import javax.swing.*;
 import java.util.Objects;
 
 public class CustomInstrument implements Instrument {
@@ -59,5 +62,10 @@ public class CustomInstrument implements Instrument {
     @Override
     public int hashCode() {
         return Objects.hash(name, fileName, pitch, pressKeys);
+    }
+
+    @Override
+    public Icon getIcon() {
+        return INPIcons.NOTE;
     }
 }

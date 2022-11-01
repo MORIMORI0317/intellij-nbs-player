@@ -1,27 +1,38 @@
 package net.morimori0317.inp.editor.ui;
 
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.paint.LinePainter2D;
 import com.intellij.util.ui.JBUI;
-import net.morimori0317.inp.INPIcons;
+import net.morimori0317.inp.NBSPlayerService;
 import net.morimori0317.inp.nbs.Layer;
 import net.morimori0317.inp.nbs.NBS;
 import net.morimori0317.inp.nbs.Note;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-public class NBSLinePanel extends JPanel {
+public class NBSLinePanel extends JPanel implements Disposable {
     private static final int NOTE_SIZE = 32;
     private final NBS nbs;
+    private final NoteLinePanel noteLine;
+    private final Project project;
 
-    public NBSLinePanel(NBS nbs) {
+    public NBSLinePanel(@NotNull Project project, NBS nbs) {
         super(new BorderLayout());
         this.nbs = nbs;
+        this.project = project;
 
         int nwidth = NOTE_SIZE * nbs.getSongLength();
         int nheight = NOTE_SIZE * nbs.getLayers().size();
@@ -29,7 +40,7 @@ public class NBSLinePanel extends JPanel {
         JPanel timeLine = new TimeLinePanel();
         timeLine.setPreferredSize(JBUI.size(nwidth, 20));
 
-        JPanel noteLine = new NoteLinePanel();
+        noteLine = new NoteLinePanel();
         noteLine.setPreferredSize(JBUI.size(nwidth, nheight));
 
         JPanel thePanel = new JPanel(new BorderLayout());
@@ -39,22 +50,30 @@ public class NBSLinePanel extends JPanel {
         add(new JBScrollPane(thePanel));
     }
 
+    @Override
+    public void dispose() {
+        Disposer.dispose(noteLine);
+    }
+
     private class TimeLinePanel extends JPanel {
         private TimeLinePanel() {
             setBackground(JBColor.BLUE);
         }
     }
 
-    private class NoteLinePanel extends JPanel {
+    private class NoteLinePanel extends JPanel implements Disposable {
+        private final List<NoteLabel> noteLabels = new ArrayList<>();
+
         private NoteLinePanel() {
             setLayout(null);
 
             for (int i = 0; i < nbs.getLayers().size(); i++) {
                 Layer layer = nbs.getLayers().get(i);
                 for (Map.Entry<Integer, Note> entry : layer.getNotes().entrySet()) {
-                    NoteLabel notel = new NoteLabel();
+                    NoteLabel notel = new NoteLabel(layer, entry.getValue());
                     notel.setBounds(entry.getKey() * NOTE_SIZE, i * NOTE_SIZE, NOTE_SIZE, NOTE_SIZE);
                     add(notel);
+                    this.noteLabels.add(notel);
                 }
             }
         }
@@ -73,19 +92,55 @@ public class NBSLinePanel extends JPanel {
                 LinePainter2D.paint((Graphics2D) g, NOTE_SIZE * i, 0, NOTE_SIZE * i, getHeight(), LinePainter2D.StrokeType.INSIDE, lv == 0 ? 1 : 2);
             }
         }
+
+        @Override
+        public void dispose() {
+            for (NoteLabel noteLabel : noteLabels) {
+                Disposer.dispose(noteLabel);
+            }
+        }
     }
 
-    private class NoteLabel extends JBLabel {
-        private NoteLabel() {
-            super(INPIcons.NOTE);
+    private class NoteLabel extends JBLabel implements MouseListener, Disposable {
+        private final Layer layer;
+        private final Note note;
+
+        private NoteLabel(Layer layer, Note note) {
+            super(note.getInstrument(nbs).getIcon());
+            this.layer = layer;
+            this.note = note;
+
+            addMouseListener(this);
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
+        public void mouseClicked(MouseEvent e) {
+            NBSPlayerService.getInstance(project).play(nbs, layer, note, false);
+        }
 
-            g.setColor(JBColor.GRAY);
-            g.fillRect(0, 0, getWidth(), getHeight());
+        @Override
+        public void mousePressed(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+
+        }
+
+        @Override
+        public void dispose() {
+            removeMouseListener(this);
         }
     }
 }

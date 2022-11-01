@@ -28,7 +28,7 @@ public class NBSFileEditor extends UserDataHolderBase implements FileEditor {
         this.myProject = project;
         this.myFile = virtualFile;
         this.nbsLoadResult = nbsLoadResult;
-        this.myPanel = new NBSEditorUI(nbsLoadResult);
+        this.myPanel = new NBSEditorUI(project, nbsLoadResult);
     }
 
     @Override

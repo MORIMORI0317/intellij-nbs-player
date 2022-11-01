@@ -10,7 +10,7 @@
         <group id="NBS.NBSPlayerActions">
             <action class="net.morimori0317.inp.editor.actions.PlayPauseAction"
                     id="NBS.Editor.PlayPause"
-                    icon="AllIcons.Graph.Grid"/>
+                    icon="AllIcons.Actions.Execute"/>
         </group>
 
         <group id="NBS.EditorToolbar">
