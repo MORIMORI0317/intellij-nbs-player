@@ -1,27 +1,25 @@
 package net.morimori0317.inp.editor.actions;
 
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.project.DumbAware;
 import net.morimori0317.inp.player.NBSPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public class StopAction extends AnAction implements DumbAware {
+public class ToggleLoopAction extends ToggleAction implements DumbAware {
     @Override
-    public void actionPerformed(@NotNull AnActionEvent e) {
+    public boolean isSelected(@NotNull AnActionEvent e) {
         NBSPlayer nbsPlayer = NBSPlayer.DATA_KEY.getData(e.getDataContext());
-        if (nbsPlayer == null) return;
+        if (nbsPlayer == null) return false;
 
-        nbsPlayer.setPlay(false);
-        nbsPlayer.setTick(0);
+        return nbsPlayer.isLoop();
     }
 
     @Override
-    public void update(@NotNull AnActionEvent e) {
-        super.update(e);
+    public void setSelected(@NotNull AnActionEvent e, boolean state) {
         NBSPlayer nbsPlayer = NBSPlayer.DATA_KEY.getData(e.getDataContext());
         if (nbsPlayer == null) return;
 
-        e.getPresentation().setEnabled(nbsPlayer.isPlaying());
+        nbsPlayer.setLoop(state);
     }
 }

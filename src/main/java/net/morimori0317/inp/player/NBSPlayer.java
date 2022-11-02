@@ -13,41 +13,81 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NBSPlayer implements Disposable {
     public static final DataKey<NBSPlayer> DATA_KEY = DataKey.create(NBSPlayer.class.getName());
     private final Project project;
     private final NBS nbs;
-    private AtomicBoolean playing = new AtomicBoolean();
-    private int tick;
+    private final AtomicBoolean playing = new AtomicBoolean();
+    private final AtomicInteger tick = new AtomicInteger();
+    private final AtomicBoolean loop = new AtomicBoolean();
 
     public NBSPlayer(@NotNull Project project, @Nullable NBS nbs) {
         this.project = project;
         this.nbs = nbs;
     }
 
+    public boolean isLoop() {
+        return loop.get();
+    }
+
+    public void setLoop(boolean loop) {
+        this.loop.set(loop);
+    }
+
+    public boolean isPlaying() {
+        return playing.get();
+    }
+
+    public void setTick(int tick) {
+        this.tick.set(tick);
+    }
+
     public void setPlay(boolean play) {
+        boolean pre = playing.get();
         playing.set(play);
-        if (playing.get())
+        if (!pre && playing.get())
             playStart();
     }
 
     private void playStart() {
         var player = NBSPlayerService.getInstance(project);
+        if (playing.get())
+            CompletableFuture.runAsync(this::playAsync, player.getPlayerExecutorService());
+    }
 
-        CompletableFuture.runAsync(() -> {
-            for (int i = 0; i < nbs.getSongLength(); i++) {
-                try {
-                    long tickSpeed = (long) (1000f / ((float) nbs.getTempo() / 100f));
-                    Thread.sleep(tickSpeed);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                playTick(i);
-                if (!playing.get())
-                    break;
+    private void playAsync() {
+        if (nbs == null)
+            return;
+
+        while (nbs.getSongLength() > tick.get()) {
+            try {
+                long tickSpeed = (long) (1000f / ((float) nbs.getTempo() / 100f));
+                Thread.sleep(tickSpeed);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        }, player.getPlayerExecutorService());
+            playTick(tick.getAndIncrement());
+
+            if (!playing.get())
+                break;
+        }
+
+
+        if (!loop.get()) {
+            tick.set(0);
+            playing.set(false);
+        } else {
+            tick.set(loopStartTick());
+            playStart();
+        }
+    }
+
+    private int loopStartTick() {
+        if (nbs != null && nbs.isLoop())
+            return nbs.getLoopStart();
+        return 0;
     }
 
     private void playTick(int tick) {

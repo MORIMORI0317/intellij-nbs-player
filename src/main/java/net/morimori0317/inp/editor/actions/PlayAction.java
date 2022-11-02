@@ -6,12 +6,21 @@ import com.intellij.openapi.project.DumbAware;
 import net.morimori0317.inp.player.NBSPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public class PlayPauseAction extends AnAction implements DumbAware {
+public class PlayAction extends AnAction implements DumbAware {
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         NBSPlayer nbsPlayer = NBSPlayer.DATA_KEY.getData(e.getDataContext());
         if (nbsPlayer == null) return;
 
         nbsPlayer.setPlay(true);
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        NBSPlayer nbsPlayer = NBSPlayer.DATA_KEY.getData(e.getDataContext());
+        if (nbsPlayer == null) return;
+
+        e.getPresentation().setEnabled(!nbsPlayer.isPlaying());
     }
 }

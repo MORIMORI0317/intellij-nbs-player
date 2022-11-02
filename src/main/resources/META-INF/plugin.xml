@@ -8,13 +8,28 @@
 
     <actions>
         <group id="NBS.NBSPlayerActions">
-            <action class="net.morimori0317.inp.editor.actions.PlayPauseAction"
-                    id="NBS.Editor.PlayPause"
+            <action class="net.morimori0317.inp.editor.actions.PlayAction"
+                    id="NBS.Editor.Play"
                     icon="AllIcons.Actions.Execute"/>
+
+            <action class="net.morimori0317.inp.editor.actions.PauseAction"
+                    id="NBS.Editor.Pause"
+                    icon="AllIcons.Actions.Pause"/>
+
+            <action class="net.morimori0317.inp.editor.actions.StopAction"
+                    id="NBS.Editor.Stop"
+                    icon="AllIcons.Actions.Suspend"/>
+
+            <action class="net.morimori0317.inp.editor.actions.ToggleLoopAction"
+                    id="NBS.Editor.ToggleLoop"
+                    icon="AllIcons.Actions.Refresh"/>
         </group>
 
         <group id="NBS.EditorToolbar">
-            <reference id="NBS.Editor.PlayPause"/>
+            <reference id="NBS.Editor.Play"/>
+            <reference id="NBS.Editor.Pause"/>
+            <reference id="NBS.Editor.Stop"/>
+            <reference id="NBS.Editor.ToggleLoop"/>
         </group>
     </actions>
 
