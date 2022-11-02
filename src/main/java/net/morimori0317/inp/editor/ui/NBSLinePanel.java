@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.paint.LinePainter2D;
 import com.intellij.util.ui.JBUI;
-import net.morimori0317.inp.NBSPlayerService;
+import net.morimori0317.inp.player.NBSPlayerService;
 import net.morimori0317.inp.nbs.Layer;
 import net.morimori0317.inp.nbs.NBS;
 import net.morimori0317.inp.nbs.Note;

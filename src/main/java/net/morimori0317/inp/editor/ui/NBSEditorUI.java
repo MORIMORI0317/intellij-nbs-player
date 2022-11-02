@@ -1,23 +1,33 @@
 package net.morimori0317.inp.editor.ui;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.ActionGroup;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.panels.NonOpaquePanel;
 import net.morimori0317.inp.editor.actions.NBSEditorActions;
 import net.morimori0317.inp.nbs.NBSLoadResult;
+import net.morimori0317.inp.player.NBSPlayer;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class NBSEditorUI extends JPanel implements Disposable {
+public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
+    private final Project project;
+    private final VirtualFile virtualFile;
     private final NBSLoadResult nbsLoadResult;
+    private final NBSPlayer nbsPlayer;
+    private NBSLinePanel linePanel;
 
-    public NBSEditorUI(@NotNull Project project, @NotNull NBSLoadResult nbsLoadResult) {
+    public NBSEditorUI(@NotNull Project project, @NotNull VirtualFile virtualFile, @NotNull NBSLoadResult nbsLoadResult, @NotNull NBSPlayer nbsPlayer) {
+        this.project = project;
+        this.virtualFile = virtualFile;
         this.nbsLoadResult = nbsLoadResult;
+        this.nbsPlayer = nbsPlayer;
 
         setLayout(new BorderLayout());
 
@@ -34,12 +44,28 @@ public class NBSEditorUI extends JPanel implements Disposable {
         add(topPanel, BorderLayout.NORTH);
 
         if (nbsLoadResult.getNBS() != null) {
-            add(new NBSLinePanel(project, nbsLoadResult.getNBS()), BorderLayout.CENTER);
+            this.linePanel = new NBSLinePanel(project, nbsLoadResult.getNBS());
+            add(linePanel, BorderLayout.CENTER);
         }
     }
 
     @Override
     public void dispose() {
+        if (linePanel != null)
+            Disposer.dispose(linePanel);
+    }
 
+    @Override
+    public @Nullable Object getData(@NotNull @NonNls String dataId) {
+        if (CommonDataKeys.PROJECT.is(dataId))
+            return project;
+
+        if (CommonDataKeys.VIRTUAL_FILE.is(dataId))
+            return virtualFile;
+
+        if (CommonDataKeys.VIRTUAL_FILE_ARRAY.is(dataId))
+            return new VirtualFile[]{virtualFile};
+
+        return NBSPlayer.DATA_KEY.is(dataId) ? nbsPlayer : null;
     }
 }

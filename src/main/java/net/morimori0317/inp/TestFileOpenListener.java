@@ -5,6 +5,7 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.morimori0317.inp.nbs.NBS;
+import net.morimori0317.inp.player.NBSPlayerService;
 import net.morimori0317.inp.testplayer.AsyncNBSPlayerOld;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,8 +16,8 @@ import java.io.InputStream;
 public class TestFileOpenListener implements FileEditorManagerListener {
     @Override
     public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-        //if (true)
-        //    return;
+        if (true)
+            return;
 
         if (!FileTypeRegistry.getInstance().isFileOfType(file, NBSFileType.INSTANCE))
             return;

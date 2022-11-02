@@ -24,7 +24,7 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="net.morimori0317.inp.NBSPlayerService"/>
+        <projectService serviceImplementation="net.morimori0317.inp.player.NBSPlayerService"/>
         <fileType name="NBS"
                   implementationClass="net.morimori0317.inp.NBSFileType"
                   fieldName="INSTANCE"

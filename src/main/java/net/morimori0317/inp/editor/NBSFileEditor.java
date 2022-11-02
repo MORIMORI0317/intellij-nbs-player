@@ -9,6 +9,7 @@ import com.intellij.openapi.util.UserDataHolderBase;
 import com.intellij.openapi.vfs.VirtualFile;
 import net.morimori0317.inp.editor.ui.NBSEditorUI;
 import net.morimori0317.inp.nbs.NBSLoadResult;
+import net.morimori0317.inp.player.NBSPlayer;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,13 +23,15 @@ public class NBSFileEditor extends UserDataHolderBase implements FileEditor {
     private final VirtualFile myFile;
     private final NBSLoadResult nbsLoadResult;
     private final FileEditorLocation editorLocation = new NBSEditorLocation(this);
+    private final NBSPlayer nbsPlayer;
     private final NBSEditorUI myPanel;
 
     public NBSFileEditor(@NotNull Project project, @NotNull VirtualFile virtualFile, @NotNull NBSLoadResult nbsLoadResult) {
         this.myProject = project;
         this.myFile = virtualFile;
         this.nbsLoadResult = nbsLoadResult;
-        this.myPanel = new NBSEditorUI(project, nbsLoadResult);
+        this.nbsPlayer = new NBSPlayer(project, nbsLoadResult.getNBS());
+        this.myPanel = new NBSEditorUI(project, virtualFile, nbsLoadResult, nbsPlayer);
     }
 
     @Override
@@ -48,7 +51,6 @@ public class NBSFileEditor extends UserDataHolderBase implements FileEditor {
 
     @Override
     public void setState(@NotNull FileEditorState state) {
-
     }
 
     @Override
@@ -77,6 +79,7 @@ public class NBSFileEditor extends UserDataHolderBase implements FileEditor {
     @Override
     public void dispose() {
         Disposer.dispose(myPanel);
+        Disposer.dispose(nbsPlayer);
     }
 
     @Override

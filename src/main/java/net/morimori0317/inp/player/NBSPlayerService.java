@@ -1,19 +1,61 @@
-package net.morimori0317.inp.nbs.player;
+package net.morimori0317.inp.player;
 
-
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.project.Project;
+import net.morimori0317.inp.nbs.Layer;
+import net.morimori0317.inp.nbs.NBS;
+import net.morimori0317.inp.nbs.Note;
 import net.morimori0317.inp.nbs.instrument.CustomInstrument;
 import net.morimori0317.inp.nbs.instrument.Instrument;
 import net.morimori0317.inp.nbs.instrument.VanillaInstrument;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class NBSPlayer {
+public class NBSPlayerService implements Disposable {
+    private final ExecutorService playerExecutorService = Executors.newCachedThreadPool(new BasicThreadFactory.Builder().namingPattern("nbs-player-%d").daemon(true).build());
 
+    public static NBSPlayerService getInstance(Project project) {
+        return project.getService(NBSPlayerService.class);
+    }
 
-    public static void play(Instrument instrument, float volume, float pitch, float pan, boolean mcRange) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
+    public ExecutorService getPlayerExecutorService() {
+        return playerExecutorService;
+    }
+
+    public void play(NBS nbs, Layer layer, Note note, boolean mcRange) {
+        Instrument instrument = note.getInstrument(nbs);
+        float vol = note.getRawVelocity() * layer.getRawVolume();
+        float dfkey = note.getInstrument(nbs).getDefaultPitch() - instrument.getDefaultPitch();
+        float pitch = (float) Math.pow(2.0f, (double) (note.getKey() - instrument.getDefaultPitch() + dfkey) / 12.0f);
+        float pan = ((float) layer.getStereo() / 100f) - 1f;
+        play(instrument, vol, pitch, pan, mcRange);
+    }
+
+    public void play(Instrument instrument, float volume, float pitch, float pan, boolean mcRange) {
+        if (!playerExecutorService.isShutdown()) {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    playInternal(instrument, volume, pitch, pan, mcRange);
+                } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+                    e.printStackTrace();
+                }
+            }, playerExecutorService);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        playerExecutorService.shutdown();
+    }
+
+    private void playInternal(Instrument instrument, float volume, float pitch, float pan, boolean mcRange) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
         try (InputStream stream = getSound(instrument)) {
             if (stream == null)
                 return;
@@ -49,7 +91,7 @@ public class NBSPlayer {
         }
     }
 
-    public static InputStream getSound(Instrument instrument) {
+    private InputStream getSound(Instrument instrument) {
         if (instrument instanceof VanillaInstrument)
             return resourceExtractor(NBSPlayer.class, String.format("/sounds/%s.wav", ((VanillaInstrument) instrument).getName()));
 
@@ -67,7 +109,7 @@ public class NBSPlayer {
         return null;
     }
 
-    private static InputStream resourceExtractor(Class<?> clazz, String path) {
+    private InputStream resourceExtractor(Class<?> clazz, String path) {
         if (path.startsWith("/")) path = path.substring(1);
 
         InputStream stream = clazz.getResourceAsStream("/" + path);
