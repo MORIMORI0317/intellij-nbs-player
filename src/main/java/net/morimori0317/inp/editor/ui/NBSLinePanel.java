@@ -9,10 +9,11 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.paint.LinePainter2D;
 import com.intellij.util.ui.JBUI;
+import dev.felnull.fnnbs.Layer;
+import dev.felnull.fnnbs.NBS;
+import dev.felnull.fnnbs.Note;
+import net.morimori0317.inp.INPIcons;
 import net.morimori0317.inp.player.NBSPlayerService;
-import net.morimori0317.inp.nbs.Layer;
-import net.morimori0317.inp.nbs.NBS;
-import net.morimori0317.inp.nbs.Note;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -106,7 +107,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
         private final Note note;
 
         private NoteLabel(Layer layer, Note note) {
-            super(note.getInstrument(nbs).getIcon());
+            super(INPIcons.getInstrumentIcon(note.getInstrument(nbs)));
             this.layer = layer;
             this.note = note;
 

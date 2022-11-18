@@ -1,6 +1,7 @@
 package net.morimori0317.inp.nbs;
 
 import com.intellij.openapi.vfs.VirtualFile;
+import dev.felnull.fnnbs.NBS;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
@@ -9,9 +10,13 @@ import java.io.InputStream;
 
 public class NBSUtils {
     public static int getVersion(InputStream stream) throws IOException {
-        if (NBS.readShort(stream) != 0)
+        if (readShort(stream) != 0)
             return 0;
         return stream.read();
+    }
+
+    private static int readShort(InputStream stream) throws IOException {
+        return (stream.read()) + (stream.read() << 8);
     }
 
     @NotNull
@@ -24,7 +29,7 @@ public class NBSUtils {
             }
             NBS nbs;
             try (InputStream stream = new BufferedInputStream(virtualFile.getInputStream())) {
-                nbs = new NBS(stream);
+                nbs = NBS.load(stream);
             }
             return new NBSLoadResult(nbs, null);
         } catch (IOException e) {

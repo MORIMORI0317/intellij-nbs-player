@@ -33,11 +33,6 @@
         </group>
     </actions>
 
-    <applicationListeners>
-        <listener class="net.morimori0317.inp.TestFileOpenListener"
-                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
-    </applicationListeners>
-
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="net.morimori0317.inp.player.NBSPlayerService"/>
         <fileType name="NBS"

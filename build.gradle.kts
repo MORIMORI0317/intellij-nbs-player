@@ -1,4 +1,3 @@
-
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
@@ -28,7 +27,9 @@ kotlin {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
-
+dependencies {
+    api("dev.felnull:felnull-nbs-library:1.5")
+}
 // Configure Gradle IntelliJ Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
     pluginName.set(properties("pluginName"))

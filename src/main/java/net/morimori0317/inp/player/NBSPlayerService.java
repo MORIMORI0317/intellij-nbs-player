@@ -2,12 +2,12 @@ package net.morimori0317.inp.player;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
-import net.morimori0317.inp.nbs.Layer;
-import net.morimori0317.inp.nbs.NBS;
-import net.morimori0317.inp.nbs.Note;
-import net.morimori0317.inp.nbs.instrument.CustomInstrument;
-import net.morimori0317.inp.nbs.instrument.Instrument;
-import net.morimori0317.inp.nbs.instrument.VanillaInstrument;
+import dev.felnull.fnnbs.Layer;
+import dev.felnull.fnnbs.NBS;
+import dev.felnull.fnnbs.Note;
+import dev.felnull.fnnbs.instrument.CustomInstrument;
+import dev.felnull.fnnbs.instrument.Instrument;
+import dev.felnull.fnnbs.instrument.VanillaInstrument;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import javax.sound.sampled.*;

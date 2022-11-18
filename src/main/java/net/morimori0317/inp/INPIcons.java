@@ -1,6 +1,9 @@
 package net.morimori0317.inp;
 
 import com.intellij.openapi.util.IconLoader;
+import dev.felnull.fnnbs.instrument.Instrument;
+import dev.felnull.fnnbs.instrument.VanillaInstrument;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
@@ -23,4 +26,45 @@ public class INPIcons {
     public static final Icon NOTE_13 = IconLoader.getIcon("/icons/player/notes/note_13.svg", INPIcons.class);
     public static final Icon NOTE_14 = IconLoader.getIcon("/icons/player/notes/note_14.svg", INPIcons.class);
     public static final Icon NOTE_15 = IconLoader.getIcon("/icons/player/notes/note_15.svg", INPIcons.class);
+
+    @NotNull
+    public static Icon getInstrumentIcon(Instrument instrument) {
+        if (instrument instanceof VanillaInstrument) {
+            switch ((VanillaInstrument) instrument) {
+                case PIANO:
+                    return INPIcons.NOTE_0;
+                case DOUBLE_BASS:
+                    return INPIcons.NOTE_1;
+                case BASS_DRUM:
+                    return INPIcons.NOTE_2;
+                case SNARE_DRUM:
+                    return INPIcons.NOTE_3;
+                case CLICK:
+                    return INPIcons.NOTE_4;
+                case GUITAR:
+                    return INPIcons.NOTE_5;
+                case FLUTE:
+                    return INPIcons.NOTE_6;
+                case BELL:
+                    return INPIcons.NOTE_7;
+                case CHIME:
+                    return INPIcons.NOTE_8;
+                case XYLOPHONE:
+                    return INPIcons.NOTE_9;
+                case IRON_XYLOPHONE:
+                    return INPIcons.NOTE_10;
+                case COW_BELL:
+                    return INPIcons.NOTE_11;
+                case DIDGERIDOO:
+                    return INPIcons.NOTE_12;
+                case BIT:
+                    return INPIcons.NOTE_13;
+                case BANJO:
+                    return INPIcons.NOTE_14;
+                case PLING:
+                    return INPIcons.NOTE_15;
+            }
+        }
+        return INPIcons.NOTE;
+    }
 }

@@ -4,13 +4,12 @@ package net.morimori0317.inp.player;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.DataKey;
 import com.intellij.openapi.project.Project;
-import net.morimori0317.inp.nbs.Layer;
-import net.morimori0317.inp.nbs.NBS;
-import net.morimori0317.inp.nbs.Note;
+import dev.felnull.fnnbs.Layer;
+import dev.felnull.fnnbs.NBS;
+import dev.felnull.fnnbs.Note;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,7 +70,7 @@ public class NBSPlayer implements Disposable {
             playTick(tick.getAndIncrement());
 
             if (!playing.get())
-                break;
+                return;
         }
 
 
@@ -96,8 +95,9 @@ public class NBSPlayer implements Disposable {
 
         NBSPlayerService playerService = NBSPlayerService.getInstance(project);
 
-        List<Layer> layers = nbs.getLayers();
-        for (Layer layer : layers) {
+        int layerct = nbs.getActualLayerCount();
+        for (int i = 0; i < layerct; i++) {
+            Layer layer = nbs.getLayer(i);
             Note note = layer.getNote(tick);
             if (note != null)
                 playerService.play(nbs, layer, note, false);

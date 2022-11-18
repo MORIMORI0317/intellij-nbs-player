@@ -1,5 +1,6 @@
 package net.morimori0317.inp.nbs;
 
+import dev.felnull.fnnbs.NBS;
 import org.jetbrains.annotations.Nullable;
 
 public class NBSLoadResult {
