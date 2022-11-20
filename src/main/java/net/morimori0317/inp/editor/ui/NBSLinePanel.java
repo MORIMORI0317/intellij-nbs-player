@@ -58,7 +58,24 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
     private class TimeLinePanel extends JPanel {
         private TimeLinePanel() {
-            setBackground(JBColor.BLUE);
+            //setBackground(JBColor.BLUE);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            Color borderColor = ColorUtil.mix(JBColor.DARK_GRAY, JBColor.WHITE, 0.3);
+            g.setColor(borderColor);
+            LinePainter2D.paint((Graphics2D) g, 0, getHeight() - 2, getWidth(), getHeight() - 2, LinePainter2D.StrokeType.INSIDE, 2);
+
+            Color lineColor = JBColor.DARK_GRAY;
+            g.setColor(lineColor);
+
+            for (int i = 1; i < getWidth() / NOTE_SIZE + 1; i++) {
+                boolean ft = i % 4 == 0;
+                LinePainter2D.paint((Graphics2D) g, (NOTE_SIZE * i), getHeight() - (ft ? 6 : 3), NOTE_SIZE * i, getHeight(), LinePainter2D.StrokeType.INSIDE, ft ? 2 : 1);
+            }
         }
     }
 
