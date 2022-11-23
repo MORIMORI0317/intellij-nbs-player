@@ -39,16 +39,26 @@ public class NBSLinePanel extends JPanel implements Disposable {
         int nheight = NOTE_SIZE * nbs.getLayers().size();
 
         JPanel timeLine = new TimeLinePanel();
-        timeLine.setPreferredSize(JBUI.size(nwidth, 20));
+        timeLine.setPreferredSize(JBUI.size(nwidth, 10));
+        JBScrollPane timeScrollPane = new JBScrollPane(timeLine);
+        timeScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        timeScrollPane.setWheelScrollingEnabled(false);
+        timeScrollPane.getHorizontalScrollBar().setEnabled(false);
 
         noteLine = new NoteLinePanel();
         noteLine.setPreferredSize(JBUI.size(nwidth, nheight));
+        JBScrollPane noteScrollPane = new JBScrollPane(noteLine);
+
+        noteScrollPane.getViewport().addChangeListener(e -> {
+            Point point = noteScrollPane.getViewport().getViewPosition();
+            timeScrollPane.getViewport().setViewPosition(new Point(point.x, 0));
+        });
 
         JPanel thePanel = new JPanel(new BorderLayout());
-        thePanel.add(timeLine, BorderLayout.NORTH);
-        thePanel.add(noteLine, BorderLayout.CENTER);
+        thePanel.add(timeScrollPane, BorderLayout.NORTH);
+        thePanel.add(noteScrollPane, BorderLayout.CENTER);
 
-        add(new JBScrollPane(thePanel));
+        add(thePanel);
     }
 
     @Override
@@ -58,7 +68,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
     private class TimeLinePanel extends JPanel {
         private TimeLinePanel() {
-            //setBackground(JBColor.BLUE);
+           //setBackground(JBColor.BLUE);
         }
 
         @Override
@@ -74,6 +84,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
             for (int i = 1; i < getWidth() / NOTE_SIZE + 1; i++) {
                 boolean ft = i % 4 == 0;
+
                 LinePainter2D.paint((Graphics2D) g, (NOTE_SIZE * i), getHeight() - (ft ? 6 : 3), NOTE_SIZE * i, getHeight(), LinePainter2D.StrokeType.INSIDE, ft ? 2 : 1);
             }
         }
