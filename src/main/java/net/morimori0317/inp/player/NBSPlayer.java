@@ -60,26 +60,24 @@ public class NBSPlayer implements Disposable {
         if (nbs == null)
             return;
 
-        while (nbs.getSongLength() > tick.get()) {
+        while (nbs.getSongLength() > tick.get() && playing.get()) {
+            playTick(tick.getAndIncrement());
             try {
                 long tickSpeed = (long) (1000f / ((float) nbs.getTempo() / 100f));
                 Thread.sleep(tickSpeed);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            playTick(tick.getAndIncrement());
-
-            if (!playing.get())
-                return;
         }
 
-
-        if (!loop.get()) {
-            tick.set(0);
-            playing.set(false);
-        } else {
-            tick.set(loopStartTick());
-            playStart();
+        if (playing.get()) {
+            if (!loop.get()) {
+                tick.set(0);
+                playing.set(false);
+            } else {
+                tick.set(loopStartTick());
+                playStart();
+            }
         }
     }
 
