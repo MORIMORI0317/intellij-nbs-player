@@ -8,6 +8,7 @@ import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.paint.LinePainter2D;
+import com.intellij.util.MathUtil;
 import com.intellij.util.ui.JBUI;
 import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
@@ -24,6 +25,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NBSLinePanel extends JPanel implements Disposable {
     private static final int NOTE_SIZE = 32;
@@ -31,6 +33,8 @@ public class NBSLinePanel extends JPanel implements Disposable {
     private final NoteLinePanel noteLine;
     private final Project project;
     private final NBSPlayer nbsPlayer;
+    private final AtomicInteger lastSlideTick = new AtomicInteger();
+    private final AtomicInteger slidePoint = new AtomicInteger();
 
     public NBSLinePanel(@NotNull Project project, NBS nbs, NBSPlayer nbsPlayer) {
         super(new BorderLayout());
@@ -57,11 +61,48 @@ public class NBSLinePanel extends JPanel implements Disposable {
             timeScrollPane.getViewport().setViewPosition(new Point(point.x, 0));
         });
 
+        nbsPlayer.setProgressListener(prgrs -> {
+            noteLine.playBarLabel.setBounds((int) ((float) NOTE_SIZE * prgrs), 0, 3, noteLine.getHeight());
+
+            int slide = (int) (Math.floor(prgrs) - lastSlideTick.get());
+            if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth()) {
+                lastSlideTick.set((int) Math.floor(prgrs));
+                setSlidePoint(prgrs, noteScrollPane);
+            }
+
+            Point point = noteScrollPane.getViewport().getViewPosition();
+            noteScrollPane.getViewport().setViewPosition(new Point(slidePoint.get(), point.y));
+        });
+
+        nbsPlayer.setPlayingListener(ply -> {
+            noteLine.playBarLabel.setVisible(ply);
+
+            noteScrollPane.getHorizontalScrollBar().setEnabled(!ply);
+            noteScrollPane.getHorizontalScrollBar().setVisible(!ply);
+
+            if (ply) {
+                Point point = noteScrollPane.getViewport().getViewPosition();
+                float pointPar = (float) point.x / (float) noteScrollPane.getViewport().getViewSize().getWidth();
+
+                lastSlideTick.set((int) Math.floor((float) nbs.getSongLength() * pointPar));
+                int slide = (int) (Math.floor(nbsPlayer.getTick()) - lastSlideTick.get());
+                if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth())
+                    setSlidePoint(nbsPlayer.getTick(), noteScrollPane);
+            }
+        });
+
         JPanel thePanel = new JPanel(new BorderLayout());
         thePanel.add(timeScrollPane, BorderLayout.NORTH);
         thePanel.add(noteScrollPane, BorderLayout.CENTER);
 
         add(thePanel);
+    }
+
+    private void setSlidePoint(float progress, JBScrollPane scrollPane) {
+        float par = progress / (float) nbs.getSongLength();
+
+        float pointPar = MathUtil.clamp(par, 0, 1);
+        slidePoint.set((int) ((float) scrollPane.getViewport().getViewSize().getWidth() * pointPar));
     }
 
     @Override
@@ -95,19 +136,13 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
     private class NoteLinePanel extends JPanel implements Disposable {
         private final List<NoteLabel> noteLabels = new ArrayList<>();
+        private final PlayBarPanel playBarLabel = new PlayBarPanel();
 
         private NoteLinePanel(int noteHeight) {
             setLayout(null);
 
-            PlayBarPanel playBarLabel = new PlayBarPanel();
             playBarLabel.setBounds(0, 0, 3, noteHeight);
             playBarLabel.setVisible(false);
-
-            playBarLabel.repaint();
-
-            nbsPlayer.setProgressListener(prgrs -> playBarLabel.setBounds(NOTE_SIZE * prgrs, 0, 3, this.getHeight()));
-            nbsPlayer.setPlayingListener(playBarLabel::setVisible);
-
             add(playBarLabel);
 
             for (int i = 0; i < nbs.getLayers().size(); i++) {

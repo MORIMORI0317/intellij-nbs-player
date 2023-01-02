@@ -8,6 +8,7 @@ import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
 import dev.felnull.fnnbs.Note;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntConsumer;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class NBSPlayer implements Disposable {
     public static final DataKey<NBSPlayer> DATA_KEY = DataKey.create(NBSPlayer.class.getName());
@@ -25,13 +26,55 @@ public class NBSPlayer implements Disposable {
     private final AtomicBoolean playing = new AtomicBoolean();
     private final AtomicInteger tick = new AtomicInteger();
     private final AtomicBoolean loop = new AtomicBoolean();
+    private final AtomicLong updateTickTime = new AtomicLong(-1);
+    private final int fps = 50;
     private Timer ringTimer;
-    private IntConsumer progressListener;
+    private Timer deltaTimer;
+    private FloatConsumer progressListener;
     private BooleanConsumer playingListener;
 
     public NBSPlayer(@NotNull Project project, @Nullable NBS nbs) {
         this.project = project;
         this.nbs = nbs;
+    }
+
+    private void startRingTimer() {
+        stopRingTimer();
+        ringTimer = new Timer((int) (1000f / ((float) nbs.getTempo() / 100f)), new RingTimer());
+        ringTimer.start();
+
+        deltaTimer = new Timer(1000 / fps, new DeltaTimer());
+        deltaTimer.start();
+    }
+
+    private void stopRingTimer() {
+        if (ringTimer != null) {
+            ringTimer.stop();
+            ringTimer = null;
+        }
+
+        if (deltaTimer != null) {
+            deltaTimer.stop();
+            deltaTimer = null;
+        }
+    }
+
+    private class DeltaTimer implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (nbs == null || !isPlaying())
+                return;
+
+            long time = updateTickTime.get();
+            if (time < 0)
+                return;
+
+            int tmp = (int) (1000f / ((float) nbs.getTempo() / 100f));
+            long eq = System.currentTimeMillis() - time;
+            float delta = ((float) eq / (float) tmp);
+            if (progressListener != null)
+                progressListener.accept((float) tick.get() + Math.min(delta, tmp));
+        }
     }
 
     private class RingTimer implements ActionListener {
@@ -41,10 +84,7 @@ public class NBSPlayer implements Disposable {
                 return;
 
             if (!playing.get()) {
-                if (ringTimer != null) {
-                    ringTimer.stop();
-                    ringTimer = null;
-                }
+                stopRingTimer();
                 return;
             }
 
@@ -60,8 +100,7 @@ public class NBSPlayer implements Disposable {
 
             int tk = tick.getAndIncrement();
             playTick(tk);
-            if (progressListener != null)
-                progressListener.accept(tk);
+            updateTickTime.set(System.currentTimeMillis());
         }
     }
 
@@ -69,7 +108,7 @@ public class NBSPlayer implements Disposable {
         this.playingListener = playingListener;
     }
 
-    public void setProgressListener(IntConsumer progressListener) {
+    public void setProgressListener(FloatConsumer progressListener) {
         this.progressListener = progressListener;
     }
 
@@ -85,17 +124,28 @@ public class NBSPlayer implements Disposable {
         return playing.get();
     }
 
+    public int getTick() {
+        return tick.get();
+    }
+
     public void setTick(int tick) {
         this.tick.set(tick);
 
-        if (progressListener != null)
+        if (progressListener != null && isPlaying())
             progressListener.accept(tick);
+        updateTickTime.set(-1);
     }
 
     public void setPlay(boolean play) {
         boolean pre = playing.get();
         playing.set(play);
-        playingListener.accept(play);
+
+
+        if (play != pre) {
+            playingListener.accept(play);
+            updateTickTime.set(play ? System.currentTimeMillis() : -1);
+        }
+
         if (!pre && playing.get())
             playStart();
     }
@@ -104,13 +154,8 @@ public class NBSPlayer implements Disposable {
         if (nbs == null)
             return;
 
-        if (playing.get()) {
-            if (ringTimer != null)
-                ringTimer.stop();
-
-            ringTimer = new Timer((int) (1000f / ((float) nbs.getTempo() / 100f)), new RingTimer());
-            ringTimer.start();
-        }
+        if (playing.get())
+            startRingTimer();
     }
 
 
@@ -138,7 +183,6 @@ public class NBSPlayer implements Disposable {
     @Override
     public void dispose() {
         setPlay(false);
-        if (ringTimer != null)
-            ringTimer.stop();
+        stopRingTimer();
     }
 }
