@@ -44,7 +44,7 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
         add(topPanel, BorderLayout.NORTH);
 
         if (nbsLoadResult.getNBS() != null) {
-            this.linePanel = new NBSLinePanel(project, nbsLoadResult.getNBS());
+            this.linePanel = new NBSLinePanel(project, nbsLoadResult.getNBS(), nbsPlayer);
             add(linePanel, BorderLayout.CENTER);
         }
     }

@@ -13,6 +13,7 @@ import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
 import dev.felnull.fnnbs.Note;
 import net.morimori0317.inp.INPIcons;
+import net.morimori0317.inp.player.NBSPlayer;
 import net.morimori0317.inp.player.NBSPlayerService;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,11 +30,13 @@ public class NBSLinePanel extends JPanel implements Disposable {
     private final NBS nbs;
     private final NoteLinePanel noteLine;
     private final Project project;
+    private final NBSPlayer nbsPlayer;
 
-    public NBSLinePanel(@NotNull Project project, NBS nbs) {
+    public NBSLinePanel(@NotNull Project project, NBS nbs, NBSPlayer nbsPlayer) {
         super(new BorderLayout());
         this.nbs = nbs;
         this.project = project;
+        this.nbsPlayer = nbsPlayer;
 
         int nwidth = NOTE_SIZE * nbs.getSongLength();
         int nheight = NOTE_SIZE * nbs.getLayers().size();
@@ -45,7 +48,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
         timeScrollPane.setWheelScrollingEnabled(false);
         timeScrollPane.getHorizontalScrollBar().setEnabled(false);
 
-        noteLine = new NoteLinePanel();
+        noteLine = new NoteLinePanel(nheight);
         noteLine.setPreferredSize(JBUI.size(nwidth, nheight));
         JBScrollPane noteScrollPane = new JBScrollPane(noteLine);
 
@@ -93,8 +96,19 @@ public class NBSLinePanel extends JPanel implements Disposable {
     private class NoteLinePanel extends JPanel implements Disposable {
         private final List<NoteLabel> noteLabels = new ArrayList<>();
 
-        private NoteLinePanel() {
+        private NoteLinePanel(int noteHeight) {
             setLayout(null);
+
+            PlayBarPanel playBarLabel = new PlayBarPanel();
+            playBarLabel.setBounds(0, 0, 3, noteHeight);
+            playBarLabel.setVisible(false);
+
+            playBarLabel.repaint();
+
+            nbsPlayer.setProgressListener(prgrs -> playBarLabel.setBounds(NOTE_SIZE * prgrs, 0, 3, this.getHeight()));
+            nbsPlayer.setPlayingListener(playBarLabel::setVisible);
+
+            add(playBarLabel);
 
             for (int i = 0; i < nbs.getLayers().size(); i++) {
                 Layer layer = nbs.getLayers().get(i);
@@ -170,6 +184,19 @@ public class NBSLinePanel extends JPanel implements Disposable {
         @Override
         public void dispose() {
             removeMouseListener(this);
+        }
+    }
+
+    private class PlayBarPanel extends JPanel {
+        private PlayBarPanel() {
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            g.setColor(JBColor.BLUE);
+            LinePainter2D.paint((Graphics2D) g, 0, 0, 0, getHeight(), LinePainter2D.StrokeType.INSIDE, 5);
         }
     }
 }

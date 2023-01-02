@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project;
 import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
 import dev.felnull.fnnbs.Note;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntConsumer;
 
 public class NBSPlayer implements Disposable {
     public static final DataKey<NBSPlayer> DATA_KEY = DataKey.create(NBSPlayer.class.getName());
@@ -24,6 +26,8 @@ public class NBSPlayer implements Disposable {
     private final AtomicInteger tick = new AtomicInteger();
     private final AtomicBoolean loop = new AtomicBoolean();
     private Timer ringTimer;
+    private IntConsumer progressListener;
+    private BooleanConsumer playingListener;
 
     public NBSPlayer(@NotNull Project project, @Nullable NBS nbs) {
         this.project = project;
@@ -54,8 +58,19 @@ public class NBSPlayer implements Disposable {
                 }
             }
 
-            playTick(tick.getAndIncrement());
+            int tk = tick.getAndIncrement();
+            playTick(tk);
+            if (progressListener != null)
+                progressListener.accept(tk);
         }
+    }
+
+    public void setPlayingListener(BooleanConsumer playingListener) {
+        this.playingListener = playingListener;
+    }
+
+    public void setProgressListener(IntConsumer progressListener) {
+        this.progressListener = progressListener;
     }
 
     public boolean isLoop() {
@@ -72,16 +87,23 @@ public class NBSPlayer implements Disposable {
 
     public void setTick(int tick) {
         this.tick.set(tick);
+
+        if (progressListener != null)
+            progressListener.accept(tick);
     }
 
     public void setPlay(boolean play) {
         boolean pre = playing.get();
         playing.set(play);
+        playingListener.accept(play);
         if (!pre && playing.get())
             playStart();
     }
 
     private void playStart() {
+        if (nbs == null)
+            return;
+
         if (playing.get()) {
             if (ringTimer != null)
                 ringTimer.stop();
