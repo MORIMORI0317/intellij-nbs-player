@@ -48,7 +48,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
         noteLine = new NoteLinePanel();
         noteLine.setPreferredSize(JBUI.size(nwidth, nheight));
         JBScrollPane noteScrollPane = new JBScrollPane(noteLine);
-       
+
         noteScrollPane.getViewport().addChangeListener(e -> {
             Point point = noteScrollPane.getViewport().getViewPosition();
             timeScrollPane.getViewport().setViewPosition(new Point(point.x, 0));

@@ -10,7 +10,9 @@ import dev.felnull.fnnbs.Note;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,10 +23,39 @@ public class NBSPlayer implements Disposable {
     private final AtomicBoolean playing = new AtomicBoolean();
     private final AtomicInteger tick = new AtomicInteger();
     private final AtomicBoolean loop = new AtomicBoolean();
+    private Timer ringTimer;
 
     public NBSPlayer(@NotNull Project project, @Nullable NBS nbs) {
         this.project = project;
         this.nbs = nbs;
+    }
+
+    private class RingTimer implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (nbs == null)
+                return;
+
+            if (!playing.get()) {
+                if (ringTimer != null) {
+                    ringTimer.stop();
+                    ringTimer = null;
+                }
+                return;
+            }
+
+            if (nbs.getSongLength() < tick.get() + 1) {
+                if (loop.get()) {
+                    tick.set(loopStartTick());
+                } else {
+                    tick.set(0);
+                    playing.set(false);
+                    return;
+                }
+            }
+
+            playTick(tick.getAndIncrement());
+        }
     }
 
     public boolean isLoop() {
@@ -51,35 +82,15 @@ public class NBSPlayer implements Disposable {
     }
 
     private void playStart() {
-        var player = NBSPlayerService.getInstance(project);
-        if (playing.get())
-            CompletableFuture.runAsync(this::playAsync, player.getPlayerExecutorService());
-    }
-
-    private void playAsync() {
-        if (nbs == null)
-            return;
-
-        while (nbs.getSongLength() > tick.get() && playing.get()) {
-            playTick(tick.getAndIncrement());
-            try {
-                long tickSpeed = (long) (1000f / ((float) nbs.getTempo() / 100f));
-                Thread.sleep(tickSpeed);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
         if (playing.get()) {
-            if (!loop.get()) {
-                tick.set(0);
-                playing.set(false);
-            } else {
-                tick.set(loopStartTick());
-                playStart();
-            }
+            if (ringTimer != null)
+                ringTimer.stop();
+
+            ringTimer = new Timer((int) (1000f / ((float) nbs.getTempo() / 100f)), new RingTimer());
+            ringTimer.start();
         }
     }
+
 
     private int loopStartTick() {
         if (nbs != null && nbs.isLoop())
@@ -105,5 +116,7 @@ public class NBSPlayer implements Disposable {
     @Override
     public void dispose() {
         setPlay(false);
+        if (ringTimer != null)
+            ringTimer.stop();
     }
 }

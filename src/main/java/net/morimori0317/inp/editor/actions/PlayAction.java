@@ -13,6 +13,23 @@ public class PlayAction extends AnAction implements DumbAware {
         if (nbsPlayer == null) return;
 
         nbsPlayer.setPlay(true);
+
+       /* var tsk = new Task.Backgroundable(e.getProject(), "TEST") {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                try {
+                    Thread.sleep(1000 * 30);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        };
+        var b = new BackgroundableProcessIndicator(tsk);
+        b.setIndeterminate(false);
+
+        ProgressManager.getInstance().runProcessWithProgressAsynchronously(tsk, b);*/
+
+        //JBTerminalPanel
     }
 
     @Override
