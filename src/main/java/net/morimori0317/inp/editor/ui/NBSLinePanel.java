@@ -1,10 +1,13 @@
 package net.morimori0317.inp.editor.ui;
 
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.ColorUtil;
+import com.intellij.ui.IdeBorderFactory;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.SideBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.paint.LinePainter2D;
@@ -28,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NBSLinePanel extends JPanel implements Disposable {
+    private static final Color BACKGROUND_COLOR = new JBColor(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground());
     private static final int NOTE_SIZE = 32;
     private final NBS nbs;
     private final NoteLinePanel noteLine;
@@ -51,6 +55,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
         timeScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         timeScrollPane.setWheelScrollingEnabled(false);
         timeScrollPane.getHorizontalScrollBar().setEnabled(false);
+
 
         noteLine = new NoteLinePanel(nheight);
         noteLine.setPreferredSize(JBUI.size(nwidth, nheight));
@@ -112,16 +117,18 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
     private class TimeLinePanel extends JPanel {
         private TimeLinePanel() {
-            //setBackground(JBColor.BLUE);
+            setBackground(BACKGROUND_COLOR);
+            Color borderColor = ColorUtil.mix(JBColor.DARK_GRAY, JBColor.WHITE, 0.3);
+            setBorder(IdeBorderFactory.createBorder(borderColor, SideBorder.BOTTOM));
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
 
-            Color borderColor = ColorUtil.mix(JBColor.DARK_GRAY, JBColor.WHITE, 0.3);
+          /*  Color borderColor = ColorUtil.mix(JBColor.DARK_GRAY, JBColor.WHITE, 0.3);
             g.setColor(borderColor);
-            LinePainter2D.paint((Graphics2D) g, 0, getHeight() - 2, getWidth(), getHeight() - 2, LinePainter2D.StrokeType.INSIDE, 2);
+            LinePainter2D.paint((Graphics2D) g, 0, getHeight() - 2, getWidth(), getHeight() - 2, LinePainter2D.StrokeType.INSIDE, 2);*/
 
             Color lineColor = JBColor.DARK_GRAY;
             g.setColor(lineColor);
@@ -154,6 +161,9 @@ public class NBSLinePanel extends JPanel implements Disposable {
                     this.noteLabels.add(notel);
                 }
             }
+
+
+            setBackground(BACKGROUND_COLOR);
         }
 
         @Override

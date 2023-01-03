@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.SideBorder;
 import com.intellij.ui.components.panels.NonOpaquePanel;
 import net.morimori0317.inp.editor.actions.NBSEditorActions;
 import net.morimori0317.inp.nbs.NBSLoadResult;
@@ -36,10 +38,11 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
         ActionToolbar actionToolbar = actionManager.createActionToolbar(NBSEditorActions.ACTION_PLACE, toolbarActions, true);
         actionToolbar.setTargetComponent(this);
 
-        JComponent toolbarPanel = actionToolbar.getComponent();
+        JComponent toolbarComp = actionToolbar.getComponent();
 
         JPanel topPanel = new NonOpaquePanel(new BorderLayout());
-        topPanel.add(toolbarPanel, BorderLayout.WEST);
+        topPanel.add(toolbarComp, BorderLayout.WEST);
+        topPanel.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
 
         add(topPanel, BorderLayout.NORTH);
 
