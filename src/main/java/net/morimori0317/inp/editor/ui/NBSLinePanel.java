@@ -64,6 +64,9 @@ public class NBSLinePanel extends JPanel implements Disposable {
         noteScrollPane.getViewport().addChangeListener(e -> {
             Point point = noteScrollPane.getViewport().getViewPosition();
             timeScrollPane.getViewport().setViewPosition(new Point(point.x, 0));
+
+            if (nbsPlayer.isPlaying())
+                noteScrollPane.getViewport().setViewPosition(new Point(slidePoint.get(), point.y));
         });
 
         nbsPlayer.setProgressListener(prgrs -> {
@@ -82,8 +85,8 @@ public class NBSLinePanel extends JPanel implements Disposable {
         nbsPlayer.setPlayingListener(ply -> {
             noteLine.playBarLabel.setVisible(ply);
 
-            noteScrollPane.getHorizontalScrollBar().setEnabled(!ply);
-            noteScrollPane.getHorizontalScrollBar().setVisible(!ply);
+            /*noteScrollPane.getHorizontalScrollBar().setEnabled(!ply);
+            noteScrollPane.getHorizontalScrollBar().setVisible(!ply);*/
 
             if (ply) {
                 Point point = noteScrollPane.getViewport().getViewPosition();
@@ -91,6 +94,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
                 lastSlideTick.set((int) Math.floor((float) nbs.getSongLength() * pointPar));
                 int slide = (int) (Math.floor(nbsPlayer.getTick()) - lastSlideTick.get());
+                slidePoint.set(point.x);
                 if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth())
                     setSlidePoint(nbsPlayer.getTick(), noteScrollPane);
             }
@@ -234,6 +238,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
     private class PlayBarPanel extends JPanel {
         private PlayBarPanel() {
+            setBorder(IdeBorderFactory.createBorder(SideBorder.LEFT | SideBorder.RIGHT));
         }
 
         @Override
