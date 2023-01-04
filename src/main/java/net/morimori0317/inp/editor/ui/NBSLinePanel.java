@@ -78,12 +78,12 @@ public class NBSLinePanel extends JPanel implements Disposable {
         add(thePanel);
 
         UiNotifyConnector.doWhenFirstShown(noteLine, () -> {
-            noteLine.playBarLabel.setBounds(0, 0, 3, noteLine.getHeight());
+            noteLine.playBarLabel.setXBound(0);
         });
     }
 
     protected void onNBSPlayProgress(float prograess) {
-        noteLine.playBarLabel.setBounds((int) ((float) NOTE_SIZE * prograess), 0, 3, noteLine.getHeight());
+        noteLine.playBarLabel.setXBound((int) ((float) NOTE_SIZE * prograess));
 
         int slide = (int) (Math.floor(prograess) - lastSlideTick.get());
         if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth()) {
@@ -110,7 +110,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
                 setSlidePoint(nbsPlayer.getTick(), noteScrollPane);
 
         } else if (playState == NBSPlayer.PlayState.STOP) {
-            noteLine.playBarLabel.setBounds(0, 0, 3, noteLine.getHeight());
+            noteLine.playBarLabel.setXBound(0);
         }
     }
 
@@ -251,6 +251,10 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
             g.setColor(JBColor.BLUE);
             LinePainter2D.paint((Graphics2D) g, 0, 0, 0, getHeight(), LinePainter2D.StrokeType.INSIDE, 5);
+        }
+
+        protected void setXBound(int x) {
+            noteLine.playBarLabel.setBounds(x, 0, 3, noteLine.getHeight());
         }
     }
 }

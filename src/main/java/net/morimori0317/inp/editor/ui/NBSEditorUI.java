@@ -10,6 +10,7 @@ import com.intellij.ui.SideBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.panels.NonOpaquePanel;
 import com.intellij.util.ui.JBUI;
+import dev.felnull.fnnbs.NBS;
 import net.morimori0317.inp.editor.actions.NBSEditorActions;
 import net.morimori0317.inp.nbs.NBSLoadResult;
 import net.morimori0317.inp.player.NBSPlayer;
@@ -55,17 +56,20 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
         if (nbsLoadResult.getNBS() != null) {
             this.linePanel = new NBSLinePanel(project, nbsLoadResult.getNBS(), nbsPlayer);
             add(linePanel, BorderLayout.CENTER);
-        }
 
-        nbsPlayer.setProgressListener(prgrs -> {
-            if (linePanel != null)
+            nbsPlayer.setProgressListener(prgrs -> {
                 linePanel.onNBSPlayProgress(prgrs);
-        });
 
-        nbsPlayer.setPlayStateListener(playState -> {
-            if (linePanel != null)
+                playTimePane.updateTime(prgrs);
+            });
+
+            nbsPlayer.setPlayStateListener(playState -> {
                 linePanel.onNBSPlayChange(playState);
-        });
+
+                if (playState == NBSPlayer.PlayState.STOP)
+                    playTimePane.updateTime(0);
+            });
+        }
     }
 
     @Override
@@ -89,14 +93,40 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
     }
 
     private class PlayTimePane extends JPanel {
+        private final JBLabel timerLabel = new JBLabel();
+
         private PlayTimePane() {
             super(new GridLayout(1, 2));
 
-            JBLabel timerLabel = new JBLabel("00:00:00;000 / 00:00:00;000");
             timerLabel.setBorder(new CompoundBorder(IdeBorderFactory.createRoundedBorder(), IdeBorderFactory.createEmptyBorder(JBUI.insets(2))));
+            updateTime(0);
             add(timerLabel);
 
             setBorder(IdeBorderFactory.createEmptyBorder(JBUI.insets(2)));
+        }
+
+        private void updateTime(float progress) {
+            NBS nbs = nbsLoadResult.getNBS();
+            float totalSec = 0f;
+            float compSec = 0f;
+
+            if (nbs != null) {
+                float tickSec = 1000f / ((float) nbs.getTempo() / 100f);
+                totalSec = tickSec * nbs.getSongLength();
+                compSec = tickSec * progress;
+            }
+
+            timerLabel.setText(String.format("%s / %s", timeStr(compSec), timeStr(totalSec)));
+        }
+
+        private String timeStr(float sec) {
+            long hourTime = (long) sec / 3600000;
+            long minTime = ((long) sec - hourTime * 3600000) / 60000;
+            long secTime = ((long) sec - hourTime * 3600000 - minTime * 60000) / 1000;
+            float milliSec = sec / 1000f;
+            long milliTime = (long) ((milliSec - (long) milliSec) * 1000f);
+
+            return String.format("%02d:%02d:%02d;%03d", hourTime, minTime, secTime, milliTime);
         }
     }
 }
