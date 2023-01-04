@@ -12,7 +12,7 @@ public class PlayAction extends AnAction implements DumbAware {
         NBSPlayer nbsPlayer = NBSPlayer.DATA_KEY.getData(e.getDataContext());
         if (nbsPlayer == null) return;
 
-        nbsPlayer.setPlay(true);
+        nbsPlayer.setPlayState(NBSPlayer.PlayState.PLAY);
 
        /* var tsk = new Task.Backgroundable(e.getProject(), "TEST") {
             @Override

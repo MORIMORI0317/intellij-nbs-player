@@ -12,8 +12,7 @@ public class StopAction extends AnAction implements DumbAware {
         NBSPlayer nbsPlayer = NBSPlayer.DATA_KEY.getData(e.getDataContext());
         if (nbsPlayer == null) return;
 
-        nbsPlayer.setPlay(false);
-        nbsPlayer.setTick(0);
+        nbsPlayer.setPlayState(NBSPlayer.PlayState.STOP);
     }
 
     @Override

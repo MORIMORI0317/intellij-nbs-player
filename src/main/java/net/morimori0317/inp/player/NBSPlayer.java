@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project;
 import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
 import dev.felnull.fnnbs.Note;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 public class NBSPlayer implements Disposable {
     public static final DataKey<NBSPlayer> DATA_KEY = DataKey.create(NBSPlayer.class.getName());
@@ -31,7 +31,7 @@ public class NBSPlayer implements Disposable {
     private Timer ringTimer;
     private Timer deltaTimer;
     private FloatConsumer progressListener;
-    private BooleanConsumer playingListener;
+    private Consumer<PlayState> playStateListener;
 
     public NBSPlayer(@NotNull Project project, @Nullable NBS nbs) {
         this.project = project;
@@ -104,8 +104,8 @@ public class NBSPlayer implements Disposable {
         }
     }
 
-    public void setPlayingListener(BooleanConsumer playingListener) {
-        this.playingListener = playingListener;
+    public void setPlayStateListener(Consumer<PlayState> playStateListener) {
+        this.playStateListener = playStateListener;
     }
 
     public void setProgressListener(FloatConsumer progressListener) {
@@ -136,13 +136,27 @@ public class NBSPlayer implements Disposable {
         updateTickTime.set(-1);
     }
 
+    public void setPlayState(PlayState playState) {
+        switch (playState) {
+            case PLAY:
+                setPlay(true);
+                break;
+            case STOP:
+                setTick(0);
+            case PAUSE:
+                setPlay(false);
+        }
+
+        playStateListener.accept(playState);
+    }
+
     public void setPlay(boolean play) {
         boolean pre = playing.get();
         playing.set(play);
 
 
         if (play != pre) {
-            playingListener.accept(play);
+            //playStateListener.accept(play);
             updateTickTime.set(play ? System.currentTimeMillis() : -1);
         }
 
@@ -184,5 +198,9 @@ public class NBSPlayer implements Disposable {
     public void dispose() {
         setPlay(false);
         stopRingTimer();
+    }
+
+    public static enum PlayState {
+        STOP, PAUSE, PLAY;
     }
 }

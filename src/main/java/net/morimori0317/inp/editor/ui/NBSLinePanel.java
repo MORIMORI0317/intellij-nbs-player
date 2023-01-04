@@ -13,6 +13,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.paint.LinePainter2D;
 import com.intellij.util.MathUtil;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.update.UiNotifyConnector;
 import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
 import dev.felnull.fnnbs.Note;
@@ -39,6 +40,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
     private final NBSPlayer nbsPlayer;
     private final AtomicInteger lastSlideTick = new AtomicInteger();
     private final AtomicInteger slidePoint = new AtomicInteger();
+    private final JBScrollPane noteScrollPane;
 
     public NBSLinePanel(@NotNull Project project, NBS nbs, NBSPlayer nbsPlayer) {
         super(new BorderLayout());
@@ -59,7 +61,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
 
         noteLine = new NoteLinePanel(nheight);
         noteLine.setPreferredSize(JBUI.size(nwidth, nheight));
-        JBScrollPane noteScrollPane = new JBScrollPane(noteLine);
+        noteScrollPane = new JBScrollPane(noteLine);
 
         noteScrollPane.getViewport().addChangeListener(e -> {
             Point point = noteScrollPane.getViewport().getViewPosition();
@@ -69,42 +71,47 @@ public class NBSLinePanel extends JPanel implements Disposable {
                 noteScrollPane.getViewport().setViewPosition(new Point(slidePoint.get(), point.y));
         });
 
-        nbsPlayer.setProgressListener(prgrs -> {
-            noteLine.playBarLabel.setBounds((int) ((float) NOTE_SIZE * prgrs), 0, 3, noteLine.getHeight());
-
-            int slide = (int) (Math.floor(prgrs) - lastSlideTick.get());
-            if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth()) {
-                lastSlideTick.set((int) Math.floor(prgrs));
-                setSlidePoint(prgrs, noteScrollPane);
-            }
-
-            Point point = noteScrollPane.getViewport().getViewPosition();
-            noteScrollPane.getViewport().setViewPosition(new Point(slidePoint.get(), point.y));
-        });
-
-        nbsPlayer.setPlayingListener(ply -> {
-            noteLine.playBarLabel.setVisible(ply);
-
-            /*noteScrollPane.getHorizontalScrollBar().setEnabled(!ply);
-            noteScrollPane.getHorizontalScrollBar().setVisible(!ply);*/
-
-            if (ply) {
-                Point point = noteScrollPane.getViewport().getViewPosition();
-                float pointPar = (float) point.x / (float) noteScrollPane.getViewport().getViewSize().getWidth();
-
-                lastSlideTick.set((int) Math.floor((float) nbs.getSongLength() * pointPar));
-                int slide = (int) (Math.floor(nbsPlayer.getTick()) - lastSlideTick.get());
-                slidePoint.set(point.x);
-                if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth())
-                    setSlidePoint(nbsPlayer.getTick(), noteScrollPane);
-            }
-        });
-
         JPanel thePanel = new JPanel(new BorderLayout());
         thePanel.add(timeScrollPane, BorderLayout.NORTH);
         thePanel.add(noteScrollPane, BorderLayout.CENTER);
 
         add(thePanel);
+
+        UiNotifyConnector.doWhenFirstShown(noteLine, () -> {
+            noteLine.playBarLabel.setBounds(0, 0, 3, noteLine.getHeight());
+        });
+    }
+
+    protected void onNBSPlayProgress(float prograess) {
+        noteLine.playBarLabel.setBounds((int) ((float) NOTE_SIZE * prograess), 0, 3, noteLine.getHeight());
+
+        int slide = (int) (Math.floor(prograess) - lastSlideTick.get());
+        if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth()) {
+            lastSlideTick.set((int) Math.floor(prograess));
+            setSlidePoint(prograess, noteScrollPane);
+        }
+
+        Point point = noteScrollPane.getViewport().getViewPosition();
+        noteScrollPane.getViewport().setViewPosition(new Point(slidePoint.get(), point.y));
+    }
+
+    protected void onNBSPlayChange(NBSPlayer.PlayState playState) {
+            /*noteScrollPane.getHorizontalScrollBar().setEnabled(!ply);
+            noteScrollPane.getHorizontalScrollBar().setVisible(!ply);*/
+
+        if (playState == NBSPlayer.PlayState.PLAY) {
+            Point point = noteScrollPane.getViewport().getViewPosition();
+            float pointPar = (float) point.x / (float) noteScrollPane.getViewport().getViewSize().getWidth();
+
+            lastSlideTick.set((int) Math.floor((float) nbs.getSongLength() * pointPar));
+            int slide = (int) (Math.floor(nbsPlayer.getTick()) - lastSlideTick.get());
+            slidePoint.set(point.x);
+            if (Math.abs(slide * (float) NOTE_SIZE) >= getWidth())
+                setSlidePoint(nbsPlayer.getTick(), noteScrollPane);
+
+        } else if (playState == NBSPlayer.PlayState.STOP) {
+            noteLine.playBarLabel.setBounds(0, 0, 3, noteLine.getHeight());
+        }
     }
 
     private void setSlidePoint(float progress, JBScrollPane scrollPane) {
@@ -152,8 +159,6 @@ public class NBSLinePanel extends JPanel implements Disposable {
         private NoteLinePanel(int noteHeight) {
             setLayout(null);
 
-            playBarLabel.setBounds(0, 0, 3, noteHeight);
-            playBarLabel.setVisible(false);
             add(playBarLabel);
 
             for (int i = 0; i < nbs.getLayers().size(); i++) {
@@ -165,7 +170,6 @@ public class NBSLinePanel extends JPanel implements Disposable {
                     this.noteLabels.add(notel);
                 }
             }
-
 
             setBackground(BACKGROUND_COLOR);
         }
