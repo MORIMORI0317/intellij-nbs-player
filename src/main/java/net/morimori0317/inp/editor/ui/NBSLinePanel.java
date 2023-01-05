@@ -205,7 +205,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
             super(INPIcons.getInstrumentIcon(note.getInstrument(nbs)));
             this.layer = layer;
             this.note = note;
-
+            
             addMouseListener(this);
         }
 

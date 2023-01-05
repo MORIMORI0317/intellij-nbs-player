@@ -96,7 +96,7 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
         private final JBLabel timerLabel = new JBLabel();
 
         private PlayTimePane() {
-            super(new GridLayout(1, 2));
+            super();
 
             timerLabel.setBorder(new CompoundBorder(IdeBorderFactory.createRoundedBorder(), IdeBorderFactory.createEmptyBorder(JBUI.insets(2))));
             updateTime(0);
