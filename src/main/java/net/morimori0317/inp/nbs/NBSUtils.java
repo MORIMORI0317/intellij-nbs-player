@@ -25,15 +25,15 @@ public class NBSUtils {
             try (InputStream stream = new BufferedInputStream(virtualFile.getInputStream())) {
                 int v = getVersion(stream);
                 if (v > 5 || v < 0)
-                    return new NBSLoadResult(null, "Unsupported NBS version");
+                    return new NBSLoadResult(null, "Unsupported NBS version: " + v);
             }
             NBS nbs;
             try (InputStream stream = new BufferedInputStream(virtualFile.getInputStream())) {
                 nbs = NBS.load(stream);
             }
             return new NBSLoadResult(nbs, null);
-        } catch (IOException e) {
-            return new NBSLoadResult(null, "Failed to load NBS file");
+        } catch (Exception e) {
+            return new NBSLoadResult(null, "Failed to load NBS file: " + e.getClass() + " (" + e.getLocalizedMessage() + ")");
         }
     }
 }

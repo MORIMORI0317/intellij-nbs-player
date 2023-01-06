@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.IdeBorderFactory;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.SideBorder;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.panels.NonOpaquePanel;
@@ -37,23 +38,24 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
 
         setLayout(new BorderLayout());
 
-        ActionManager actionManager = ActionManager.getInstance();
-        ActionGroup toolbarActions = (ActionGroup) actionManager.getAction(NBSEditorActions.GROUP_TOOLBAR);
-        ActionToolbar actionToolbar = actionManager.createActionToolbar(NBSEditorActions.ACTION_PLACE, toolbarActions, true);
-        actionToolbar.setTargetComponent(this);
-
-        JComponent toolbarComp = actionToolbar.getComponent();
-
-        PlayTimePane playTimePane = new PlayTimePane();
-
-        JPanel topPanel = new NonOpaquePanel(new BorderLayout());
-        topPanel.add(toolbarComp, BorderLayout.WEST);
-        topPanel.add(playTimePane, BorderLayout.EAST);
-        topPanel.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
-
-        add(topPanel, BorderLayout.NORTH);
-
         if (nbsLoadResult.getNBS() != null) {
+            ActionManager actionManager = ActionManager.getInstance();
+            ActionGroup toolbarActions = (ActionGroup) actionManager.getAction(NBSEditorActions.GROUP_TOOLBAR);
+            ActionToolbar actionToolbar = actionManager.createActionToolbar(NBSEditorActions.ACTION_PLACE, toolbarActions, true);
+            actionToolbar.setTargetComponent(this);
+
+            JComponent toolbarComp = actionToolbar.getComponent();
+
+            PlayTimePane playTimePane = new PlayTimePane();
+
+            JPanel topPanel = new NonOpaquePanel(new BorderLayout());
+            topPanel.add(toolbarComp, BorderLayout.WEST);
+            topPanel.add(playTimePane, BorderLayout.EAST);
+            topPanel.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM));
+
+            add(topPanel, BorderLayout.NORTH);
+
+
             this.linePanel = new NBSLinePanel(project, nbsLoadResult.getNBS(), nbsPlayer);
             add(linePanel, BorderLayout.CENTER);
 
@@ -69,6 +71,14 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
                 if (playState == NBSPlayer.PlayState.STOP)
                     playTimePane.updateTime(0);
             });
+        } else {
+            String error = nbsLoadResult.getError();
+            if (error == null)
+                error = "Could not load";
+
+            JBLabel errorLabel = new JBLabel(error, SwingConstants.CENTER);
+            errorLabel.setForeground(JBColor.RED);
+            add(errorLabel, BorderLayout.CENTER);
         }
     }
 
