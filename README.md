@@ -3,6 +3,7 @@
 This project is an IntelliJ plugin
 <!-- Plugin description -->
 Supports playback and display of [NBS format](https://opennbs.org/nbs) files.  
+![Img](.github/readme/2023-01-07_06h53_52.png)  
 Editing is not supported, please use [Open Note Block Studio](https://opennbs.org/).
 
 Support for each version of NBS:
