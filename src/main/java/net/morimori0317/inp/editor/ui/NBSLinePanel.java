@@ -17,6 +17,7 @@ import com.intellij.util.ui.update.UiNotifyConnector;
 import dev.felnull.fnnbs.Layer;
 import dev.felnull.fnnbs.NBS;
 import dev.felnull.fnnbs.Note;
+import dev.felnull.fnnbs.instrument.Instrument;
 import net.morimori0317.inp.INPIcons;
 import net.morimori0317.inp.player.NBSPlayer;
 import net.morimori0317.inp.player.NBSPlayerService;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class NBSLinePanel extends JPanel implements Disposable {
     private static final Color BACKGROUND_COLOR = new JBColor(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground());
+    private static final String[] KEYS = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
     private static final int NOTE_SIZE = 32;
     private final NBS nbs;
     private final NoteLinePanel noteLine;
@@ -205,8 +207,26 @@ public class NBSLinePanel extends JPanel implements Disposable {
             super(INPIcons.getInstrumentIcon(note.getInstrument(nbs)));
             this.layer = layer;
             this.note = note;
-            
+
             addMouseListener(this);
+
+            setLayout(new BorderLayout());
+
+            JBLabel keyNameLabel = new JBLabel(KEYS[note.getKey() % 12], SwingConstants.CENTER);
+
+            keyNameLabel.setForeground(new JBColor(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()));
+            add(keyNameLabel, BorderLayout.CENTER);
+
+
+            if (!isMcRange())
+                setBorder(IdeBorderFactory.createBorder(JBColor.RED));
+        }
+
+        private boolean isMcRange() {
+            Instrument instrument = note.getInstrument(nbs);
+            float dfkey = note.getInstrument(nbs).getDefaultPitch() - instrument.getDefaultPitch();
+            float pitch = (float) Math.pow(2.0f, (double) (note.getKey() - instrument.getDefaultPitch() + dfkey) / 12.0f);
+            return pitch >= 0.5f && pitch <= 2.0F;
         }
 
         @Override

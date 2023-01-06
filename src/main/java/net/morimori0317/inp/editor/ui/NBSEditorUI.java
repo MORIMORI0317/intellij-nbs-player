@@ -98,11 +98,11 @@ public class NBSEditorUI extends JPanel implements Disposable, DataProvider {
         private PlayTimePane() {
             super();
 
-            timerLabel.setBorder(new CompoundBorder(IdeBorderFactory.createRoundedBorder(), IdeBorderFactory.createEmptyBorder(JBUI.insets(2))));
+            timerLabel.setBorder(new CompoundBorder(IdeBorderFactory.createRoundedBorder(), IdeBorderFactory.createEmptyBorder(JBUI.insets(0, 4))));
             updateTime(0);
             add(timerLabel);
 
-            setBorder(IdeBorderFactory.createEmptyBorder(JBUI.insets(2)));
+            setBorder(IdeBorderFactory.createEmptyBorder(JBUI.insets(0, 2)));
         }
 
         private void updateTime(float progress) {
