@@ -1,1 +1,1 @@
-rootProject.name = "Intellij NBS Player"
+rootProject.name = "IntelliJ NBS Player"
