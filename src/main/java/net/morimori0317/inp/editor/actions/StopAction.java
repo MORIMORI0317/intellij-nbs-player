@@ -1,5 +1,6 @@
 package net.morimori0317.inp.editor.actions;
 
+import com.intellij.DynamicBundle;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAware;

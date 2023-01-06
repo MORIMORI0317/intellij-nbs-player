@@ -213,13 +213,24 @@ public class NBSLinePanel extends JPanel implements Disposable {
             setLayout(new BorderLayout());
 
             JBLabel keyNameLabel = new JBLabel(KEYS[note.getKey() % 12], SwingConstants.CENTER);
-
             keyNameLabel.setForeground(new JBColor(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()));
-            add(keyNameLabel, BorderLayout.CENTER);
+            add(keyNameLabel, BorderLayout.NORTH);
 
+            //https://github.com/OpenNBS/OpenNoteBlockStudio/blob/HEAD/scripts/draw_block/draw_block.gml#L81
+            JBLabel subValueLabel = new JBLabel(getKeyValText(), SwingConstants.CENTER);
+            add(subValueLabel, BorderLayout.SOUTH);
 
             if (!isMcRange())
                 setBorder(IdeBorderFactory.createBorder(JBColor.RED));
+        }
+
+        private String getKeyValText() {
+            int key = note.getKey();
+            if (key < 33)
+                return "<";
+            if (key > 57)
+                return ">";
+            return String.valueOf(key - 33);
         }
 
         private boolean isMcRange() {

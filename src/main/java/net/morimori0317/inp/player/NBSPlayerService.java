@@ -25,6 +25,11 @@ public class NBSPlayerService implements Disposable {
         return project.getService(NBSPlayerService.class);
     }
 
+    @Override
+    public void dispose() {
+        playerExecutorService.shutdown();
+    }
+
     public ExecutorService getPlayerExecutorService() {
         return playerExecutorService;
     }
@@ -48,11 +53,6 @@ public class NBSPlayerService implements Disposable {
                 }
             }, playerExecutorService);
         }
-    }
-
-    @Override
-    public void dispose() {
-        playerExecutorService.shutdown();
     }
 
     private void playInternal(Instrument instrument, float volume, float pitch, float pan, boolean mcRange) throws IOException, UnsupportedAudioFileException, LineUnavailableException {

@@ -4,8 +4,10 @@
     <name>Minecraft NBS Player</name>
     <vendor>MORIMORI0317</vendor>
 
-    <depends>com.intellij.modules.platform</depends>
+    
 
+    <depends>com.intellij.modules.platform</depends>
+    <resource-bundle>messages.INPBundle</resource-bundle>
     <actions>
         <group id="NBS.NBSPlayerActions">
             <action class="net.morimori0317.inp.editor.actions.PlayAction"
