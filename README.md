@@ -1,10 +1,11 @@
 # IntelliJ NBS Player
 
 This project is an IntelliJ plugin
+
+![Img](.github/readme/screenshot.png)
+
 <!-- Plugin description -->
 Supports playback and display of [NBS format](https://opennbs.org/nbs) files.
-
-![Img](https://raw.githubusercontent.com/MORIMORI0317/intellij-nbs-player/main/.github/readme/screenshot.png) 
 
 Editing is not supported, please use [Open Note Block Studio](https://opennbs.org/).
 
