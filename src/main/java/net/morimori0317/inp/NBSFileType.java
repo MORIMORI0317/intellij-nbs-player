@@ -3,6 +3,7 @@ package net.morimori0317.inp;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.NlsContexts;
 import com.intellij.openapi.util.NlsSafe;
+import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +23,13 @@ public class NBSFileType extends LanguageFileType {
     }
 
     @Override
+    public @Nls @NotNull String getDisplayName() {
+        return INPBundle.message("filetype.nbs.name");
+    }
+
+    @Override
     public @NlsContexts.Label @NotNull String getDescription() {
-        return "NBS description";
+        return INPBundle.message("filetype.nbs.description");
     }
 
     @Override
