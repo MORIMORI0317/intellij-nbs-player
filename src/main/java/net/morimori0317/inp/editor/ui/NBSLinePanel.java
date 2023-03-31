@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class NBSLinePanel extends JPanel implements Disposable {
-    private static final Color BACKGROUND_COLOR = new JBColor(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground());
+    private static final Color BACKGROUND_COLOR = JBColor.lazy(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground());
     private static final String[] KEYS = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
     private static final int NOTE_SIZE = 32;
     private final NBS nbs;
@@ -213,7 +213,7 @@ public class NBSLinePanel extends JPanel implements Disposable {
             setLayout(new BorderLayout());
 
             JBLabel keyNameLabel = new JBLabel(KEYS[note.getKey() % 12], SwingConstants.CENTER);
-            keyNameLabel.setForeground(new JBColor(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()));
+            keyNameLabel.setForeground(JBColor.lazy(() -> EditorColorsManager.getInstance().getGlobalScheme().getDefaultBackground()));
             add(keyNameLabel, BorderLayout.NORTH);
 
             //https://github.com/OpenNBS/OpenNoteBlockStudio/blob/HEAD/scripts/draw_block/draw_block.gml#L81
