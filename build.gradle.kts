@@ -87,7 +87,7 @@ tasks {
             }
         })
 
-        val changelog = project.changelog // local variable for configuration cache compatibility
+        /*val changelog = project.changelog // local variable for configuration cache compatibility
         // Get the latest available change notes from the changelog file
         changeNotes.set(properties("pluginVersion").map { pluginVersion ->
             with(changelog) {
@@ -98,7 +98,7 @@ tasks {
                     Changelog.OutputType.HTML,
                 )
             }
-        })
+        })*/
     }
 
     // Configure UI tests plugin
